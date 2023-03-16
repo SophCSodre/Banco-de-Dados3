@@ -69,6 +69,9 @@ FROM produtos;
 SELECT COUNT(IDProduto)
 FROM produtos;
 
+SELECT AVG(IDProduto)
+FROM produtos;
+
 SELECT SUM(IDProduto)
 FROM produtos;
 
