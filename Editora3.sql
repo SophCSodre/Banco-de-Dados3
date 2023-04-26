@@ -120,3 +120,24 @@ CREATE TEMPORARY TABLE tmp_calculos(
     Subtotal DECIMAL(7,2) NOT NULL
 );
 
+INSERT INTO tmp_calculos(IDVenda, Titulo, Qntde, Preco, Desconto, Subtotal)
+SELECT ItensNF.IDVenda,
+l.TituloLivro,
+ItensNF.QtdeVendida,
+l.PrecoUnitario,
+(ItensNF.QtdeVendida * l.PrecoUnitario) * IFNULL(ItensNF.Desconto/100,0),
+(ItensNF.QtdeVendida * l.PrecoUnitario) -((ItensNF.QtdeVendida * l.PrecoUnitario) * IFNULL(ItensNF.Desconto/100,0))
+FROM ItensNF
+INNER JOIN Livros AS l
+ON ItensNF.IDLivro = l.IDLivro;
+
+CREATE TEMPORARY TABLE tmp_total
+SELECT nf.IDVenda,
+l.NomeLivraria AS Livraria,
+nf.DataVenda AS Data,
+SUM(calc.Subtotal) AS Total
+FROM NotasFiscais AS nf
+INNER JOIN Livrarias AS l
+ON nf.IDLivraria = l.IDLivraria
+INNER JOIN tmp_calculos AS calc
+ON calc.IDVenda = nf.IDVenda;
