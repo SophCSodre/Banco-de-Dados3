@@ -81,26 +81,26 @@ VALUES (1,3,5),
 (4,6,10),
 (4,2,5);
 
-ALTER TABLE ItensNF ADD COLUMN Desconto TINYINT NULL;
+ALTER TABLE ItensNF ADD COLUMN Desconto TINYINT NULL; //adiciona uma coluna tinyint
 
-UPDATE ItensNF SET Desconto = 10 WHERE IDVenda = 1;
+UPDATE ItensNF SET Desconto = 10 WHERE IDVenda = 1; //adiciona desconto de 10% em tds as idvendas de codigo 1
 
-UPDATE ItensNF SET Desconto = 50 WHERE IDVenda = 4;
+UPDATE ItensNF SET Desconto = 50 WHERE IDVenda = 4; //adiciona desconto de 50% em tds as idvendas de codigo 4
 
 SELECT IDVenda, Livros.IDLivro, PrecoUnitario, QtdeVendida, Desconto,
 PrecoUnitario*QtdeVendida - (PrecoUnitario*QtdeVendida* IFNULL(Desconto/100, 0)) AS Subtotal
 FROM Livros INNER JOIN ItensNF ON Livros.IDLivro = ItensNF.IDLivro
-ORDER BY IDVenda;
+ORDER BY IDVenda; //realiza uma consulta nas tabelas itensNF e livros, exibindo o Subtotal de cada item com o valor do desconto aplicado
 
 CREATE TEMPORARY TABLE tmp_Livros
-SELECT * FROM Livros;
+SELECT * FROM Livros; //cria uma tabela temporaria
 
-SELECT * FROM tmp_Livros;
+SELECT * FROM tmp_Livros; //seleciona a tabela temporaria
 
 CREATE TEMPORARY TABLE tmp_livrarias(
     ID INT (11) NOT NULL PRIMARY KEY,
     NOME VARCHAR(50) NOT NULL,
-    CONTATO VARCHAR(13) NOT NULL);
+    CONTATO VARCHAR(13) NOT NULL); //insere colunas na tabela temporaria
 
 DESC tmp_livrarias;
 
@@ -109,7 +109,7 @@ VALUES (1,'Livraria Francesa','11 3231-4555'),
 (2,'Livraria da Vila','11 3814-5811'),
 (3,'Devir Livraria Ltda','11 2127-8787'),
 (4,'Livraria Cultura','11 3170-4033'),
-(5,'Moonshadows Livraria','11 3266-3916');
+(5,'Moonshadows Livraria','11 3266-3916'); //insere valor na tabela temporaria
 
 CREATE TEMPORARY TABLE tmp_calculos(
     IDVenda INT (11) NOT NULL,
@@ -120,16 +120,12 @@ CREATE TEMPORARY TABLE tmp_calculos(
     Subtotal DECIMAL(7,2) NOT NULL
 );
 
-INSERT INTO tmp_calculos(IDVenda, Titulo, Qntde, Preco, Desconto, Subtotal)
-SELECT ItensNF.IDVenda,
-l.TituloLivro,
-ItensNF.QtdeVendida,
-l.PrecoUnitario,
-(ItensNF.QtdeVendida * l.PrecoUnitario) * IFNULL(ItensNF.Desconto/100,0),
-(ItensNF.QtdeVendida * l.PrecoUnitario) -((ItensNF.QtdeVendida * l.PrecoUnitario) * IFNULL(ItensNF.Desconto/100,0))
-FROM ItensNF
-INNER JOIN Livros AS l
-ON ItensNF.IDLivro = l.IDLivro;
+INSERT INTO tmp_calculos(IDVenda, Titulo, Qntde, Preco, Desconto, Subtotal) //inserindo dados a essa tabela
+SELECT ItensNF.IDVenda, TituloLivro, QtdeVendida, PrecoUnitario, //selecionando colunas da tabela itensNF
+PrecoUnitario * QtdeVendida * IFNULL(Desconto / 100,0) AS Desconto, //35,00 * 20 * (10%) = 70,00 AS Desconto
+PrecoUnitario * QtdeVendida - (PrecoUnitario * QtdeVendida * IFNULL(Desconto / 100,0)) AS Subtotal //35,00 * 20 - 70,00 AS Subtotal (700 - 70 = 630)
+FROM ItensNF INNER JOIN Livros ON ItensNF.IDLivro = livros.IDLivro //da tabela itensNF junto com a tabela livros sobre idlivros (presente em ambas tabelas)
+ORDER BY IDVenda; //ordenado pela idvenda
 
 CREATE TEMPORARY TABLE tmp_total
 SELECT nf.IDVenda,
