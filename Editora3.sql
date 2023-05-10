@@ -135,5 +135,5 @@ SUM(calc.Subtotal) AS Total //calculando a somatória
 FROM NotasFiscais AS nf
 INNER JOIN Livrarias AS l
 ON nf.IDLivraria = l.IDLivraria //comparando colunas
-INNER JOIN tmp_calculos AS calc //apelidando tmp_calculos e unindo as tabelas tmp_total e tmp_calculos
+INNER JOIN tmp_calculos AS calc //apelidando tmp_calculos, unindo e comparando as tabelas tmp_total e tmp_calculos
 ON calc.IDVenda = nf.IDVenda;
