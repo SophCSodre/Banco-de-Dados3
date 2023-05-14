@@ -130,7 +130,7 @@ ORDER BY IDVenda; --ordenado pela idvenda
 CREATE TEMPORARY TABLE tmp_total
 SELECT nf.IDVenda,
 l.NomeLivraria AS Livraria, --apelidando o nome da coluna
-nf.DataVenda AS Data,
+nf.DataVenda AS Data, --apelidando datavenda para data
 SUM(calc.Subtotal) AS Total --calculando a somatória
 FROM NotasFiscais AS nf
 INNER JOIN Livrarias AS l
