@@ -1,3 +1,5 @@
+/* Sophia Cruz Sodré - RM: 19516 e Yasmin Marques Tito - RM: 19692 */
+
 DROP DATABASE IF EXISTS Pizzaria;
 
 CREATE DATABASE IF NOT EXISTS Pizzaria;
@@ -33,29 +35,27 @@ CREATE TABLE Pedidos (
     CodPedido INT NOT NULL PRIMARY KEY,
     DataPedido TIMESTAMP NOT NULL,
     CodCliente INT NOT NULL,
-    CONSTRAINT FK_Pedidos_Clientes FOREIGN KEY (CodCliente) REFERENCES Clientes (CodCliente)
+    FOREIGN KEY (CodCliente) REFERENCES Clientes (CodCliente)
 );
 
 CREATE TABLE PizzasPedidas(
     CodPedido INT NOT NULL,
     CodPizza INT NOT NULL,
-    Quantidade INT NOT NULL,
-    PRIMARY KEY(CodPedido, CodPizza),
-    CONSTRAINT FK_PizzasPedidas_Pedidos FOREIGN KEY (CodPedido) REFERENCES Pedidos (CodPedido),
-    CONSTRAINT FK_PizzasPedidas_Pizzas FOREIGN KEY (CodPizza) REFERENCES Pizzas (CodPizza)
+    QtdePizza INT NOT NULL,
+    FOREIGN KEY (CodPedido) REFERENCES Pedidos (CodPedido),
+    FOREIGN KEY (CodPizza) REFERENCES Pizzas (CodPizza)
 );
 
 CREATE TABLE BebidasPedidas(
     CodPedido INT NOT NULL,
     CodBebida INT NOT NULL,
-    Quantidade INT NOT NULL,
-    PRIMARY KEY(CodPedido, CodBebida),
-    CONSTRAINT FK_BebidasPedidas_Pedidos FOREIGN KEY (CodPedido) REFERENCES Pedidos (CodPedido),
-    CONSTRAINT FK_BebidasPedidas_Bebidas FOREIGN KEY (CodBebida) REFERENCES Bebidas (CodBebida)
+    QtdeBebida INT NOT NULL,
+    FOREIGN KEY (CodPedido) REFERENCES Pedidos (CodPedido),
+    FOREIGN KEY (CodBebida) REFERENCES Bebidas (CodBebida)
 );
 
 INSERT INTO Clientes
-VALUES (1, 'Yasmin Marques Tito', 'Bahia', '04849522', 'B', 'Cantinho do Céu', '59333362');
+VALUES (1, 'Yasmin Marques Tito', 'Bahia', '04849522', '245', 'Cantinho do Céu', '59333362'),
 (2, 'Sophia Cruz Sodre', 'Pierre de Beranger', '04676051', '141', 'Campo Grande', '977149197'),
 (3, 'Walssimon dos Santos Silva Sacramento', 'Alameda Santo Amaro', '04647001', '11', 'Santo Amaro', '971485417'),
 (4, 'Wersington dos Santos Silva Sacramento', 'Angelo José Ribeiro', '04779841', '4', 'Parelheiros', '59797906'),
@@ -102,15 +102,26 @@ VALUES (1, 1, 1),
 (4, 1, 1),
 (5, 3, 1);
 
-CREATE TEMPORARY TABLE tmp_subtotalp(
-    CodPedido INT NOT NULL,
-    NomePizza VARCHAR(50),
-    Quantidade INT NOT NULL,
-    PrecoPizza DECIMAL(5,2) NOT NULL,
-    Subtotal DECIMAL(7,2) NOT NULL
-);
+CREATE TEMPORARY TABLE tmp_subtotalPizzas
+SELECT pz.PrecoPizza * pzp.QtdePizza AS SubtotalPizza
+FROM Pizzas AS pz
+INNER JOIN PizzasPedidas AS pzp
+ON pz.CodPizza = pzp.CodPizza;
 
-INSERT INTO tmp_subtotalp(CodPedido, NomePizza, Quantidade, PrecoPizza, Subtotal)
-SELECT CodPedido, CodPizza, Quantidade
-FROM tmp_subtotalp
-WHERE PrecoPizza
+CREATE TEMPORARY TABLE tmp_subotalBebidas
+SELECT bz.PrecoBebida * bzp.QtdeBebida AS SubtotalBebidas
+FROM Bebidas AS bz
+INNER JOIN BebidasPedidas AS bzp
+ON bz.CodBebida = bzp.CodBebida;
+
+CREATE TEMPORARY TABLE tmp_total AS
+SELECT Pedidos.CodPedido, Pedidos.DataPedido, Clientes.NomeCliente,
+    SUM(Bebidas.PrecoBebida * BebidasPedidas.QtdeBebida) + 
+    SUM(Pizzas.PrecoPizza * PizzasPedidas.QtdePizza) AS Total
+FROM Pedidos
+JOIN Clientes ON Pedidos.CodCliente = Clientes.CodCliente
+LEFT JOIN PizzasPedidas ON Pedidos.CodPedido = PizzasPedidas.CodPedido
+LEFT JOIN Pizzas ON PizzasPedidas.CodPizza = Pizzas.CodPizza
+LEFT JOIN BebidasPedidas ON Pedidos.CodPedido = BebidasPedidas.CodPedido
+LEFT JOIN Bebidas ON BebidasPedidas.CodBebida = Bebidas.CodBebida
+GROUP BY Pedidos.CodPedido;
