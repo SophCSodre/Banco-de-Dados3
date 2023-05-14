@@ -1,5 +1,3 @@
-/* Sophia Cruz Sodré - RM: 19516 e Yasmin Marques Tito - RM: 19692 */
-
 DROP DATABASE IF EXISTS Pizzaria;
 
 CREATE DATABASE IF NOT EXISTS Pizzaria;
